@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get database URL from environment variable, default to SQLite for local development
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./money_manager.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app_v2.db")
 
 # For SQLite, we need to enable check_same_thread=False to allow multiple threads
 # For PostgreSQL, this is not needed

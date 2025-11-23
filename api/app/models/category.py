@@ -5,7 +5,7 @@ Defines the structure of the 'categories' table.
 Categories are used to organize transactions (e.g., Food, Transport, Salary).
 """
 
-from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 import enum
 from ..database import Base
@@ -38,6 +38,8 @@ class Category(Base):
     type = Column(Enum(TransactionType), nullable=False)
     color = Column(String, default="#6366f1")  # Default indigo color
     icon = Column(String, default="💰")  # Default money emoji
+    user_id = Column(Integer, ForeignKey("users.id"))
 
     # Relationship: One category can have many transactions
     transactions = relationship("Transaction", back_populates="category", cascade="all, delete-orphan")
+    owner = relationship("User", back_populates="categories")

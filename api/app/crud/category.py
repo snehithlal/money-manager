@@ -15,139 +15,64 @@ from app.schemas import CategoryCreate, CategoryUpdate
 def get_category(db: Session, category_id: int):
     """
     Get a single category by ID.
-
-    Args:
-        db: Database session
-        category_id: ID of the category to retrieve
-
-    Returns:
-        Category object or None if not found
     """
     return db.query(Category).filter(Category.id == category_id).first()
 
 
-def get_categories(db: Session, skip: int = 0, limit: int = 100):
+def get_categories(db: Session, skip: int = 0, limit: int = 100, user_id: int = None):
     """
-    Get all categories with pagination.
-
-    Args:
-        db: Database session
-        skip: Number of records to skip (for pagination)
-        limit: Maximum number of records to return
-
-    Returns:
-        List of Category objects
+    Get all categories with pagination, filtered by user.
     """
-    return db.query(Category).offset(skip).limit(limit).all()
+    return db.query(Category).filter(Category.user_id == user_id).offset(skip).limit(limit).all()
 
 
-def get_categories_by_type(db: Session, transaction_type: str):
+def get_categories_by_type(db: Session, type: str, user_id: int = None):
     """
-    Get categories filtered by type (income or expense).
-
-    Args:
-        db: Database session
-        transaction_type: "income" or "expense"
-
-    Returns:
-        List of Category objects
+    Get categories filtered by type (income/expense) and user.
     """
-    return db.query(Category).filter(Category.type == transaction_type).all()
+    return db.query(Category).filter(
+        Category.type == type,
+        Category.user_id == user_id
+    ).all()
 
 
-def create_category(db: Session, category: CategoryCreate):
+def create_category(db: Session, category: CategoryCreate, user_id: int):
     """
-    Create a new category.
-
-    Args:
-        db: Database session
-        category: CategoryCreate schema with category data
-
-    Returns:
-        Created Category object
-
-    Process:
-        1. Convert Pydantic schema to dict
-        2. Create SQLAlchemy model instance
-        3. Add to database session
-        4. Commit transaction
-        5. Refresh to get generated ID
-        6. Return created category
+    Create a new category for a user.
     """
-    # Convert Pydantic model to dict and create Category instance
-    db_category = Category(**category.model_dump())
-
-    # Add to session (stages the change)
+    db_category = Category(
+        name=category.name,
+        type=category.type,
+        color=category.color,
+        icon=category.icon,
+        user_id=user_id
+    )
     db.add(db_category)
-
-    # Commit to database (executes INSERT)
     db.commit()
-
-    # Refresh to get the generated ID and other defaults
     db.refresh(db_category)
-
     return db_category
 
 
-def update_category(db: Session, category_id: int, category: CategoryUpdate):
+def update_category(db: Session, category_id: int, category: CategoryUpdate, user_id: int):
     """
     Update an existing category.
-
-    Args:
-        db: Database session
-        category_id: ID of category to update
-        category: CategoryUpdate schema with new data
-
-    Returns:
-        Updated Category object or None if not found
-
-    Process:
-        1. Get existing category
-        2. Update only provided fields
-        3. Commit changes
-        4. Return updated category
     """
-    # Get existing category
-    db_category = get_category(db, category_id)
-
-    if db_category is None:
-        return None
-
-    # Update only the fields that were provided
-    update_data = category.model_dump(exclude_unset=True)
-
-    for field, value in update_data.items():
-        setattr(db_category, field, value)
-
-    # Commit changes
-    db.commit()
-    db.refresh(db_category)
-
+    db_category = db.query(Category).filter(Category.id == category_id, Category.user_id == user_id).first()
+    if db_category:
+        update_data = category.model_dump(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(db_category, key, value)
+        db.commit()
+        db.refresh(db_category)
     return db_category
 
 
-def delete_category(db: Session, category_id: int):
+def delete_category(db: Session, category_id: int, user_id: int):
     """
     Delete a category.
-
-    Args:
-        db: Database session
-        category_id: ID of category to delete
-
-    Returns:
-        Deleted Category object or None if not found
-
-    Note:
-        Due to cascade="all, delete-orphan" in the relationship,
-        all transactions in this category will also be deleted.
     """
-    db_category = get_category(db, category_id)
-
-    if db_category is None:
-        return None
-
-    # Delete the category
-    db.delete(db_category)
-    db.commit()
-
+    db_category = db.query(Category).filter(Category.id == category_id, Category.user_id == user_id).first()
+    if db_category:
+        db.delete(db_category)
+        db.commit()
     return db_category

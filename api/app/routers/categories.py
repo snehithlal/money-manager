@@ -19,15 +19,10 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.schemas import Category, CategoryCreate, CategoryUpdate
-from app.crud import (
-    get_category,
-    get_categories,
-    get_categories_by_type,
-    create_category,
-    update_category,
-    delete_category
-)
+from app.schemas.category import Category, CategoryCreate, CategoryUpdate
+from app import crud
+from app.api.deps import get_current_user
+from app.models.user import User
 
 # Create router instance
 router = APIRouter()
@@ -38,10 +33,11 @@ def list_categories(
     skip: int = 0,
     limit: int = 100,
     type: str = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get all categories with optional filtering.
+    Get all categories for the current user with optional filtering.
 
     Query Parameters:
         - skip: Number of records to skip (default: 0)
@@ -50,27 +46,20 @@ def list_categories(
 
     Returns:
         List of categories
-
-    Example:
-        GET /api/v1/categories
-        GET /api/v1/categories?type=expense
-        GET /api/v1/categories?skip=10&limit=20
     """
     if type:
-        # Filter by type if provided
-        return get_categories_by_type(db, type)
-    else:
-        # Get all categories with pagination
-        return get_categories(db, skip=skip, limit=limit)
+        return crud.get_categories_by_type(db, type=type, user_id=current_user.id)
+    return crud.get_categories(db, skip=skip, limit=limit, user_id=current_user.id)
 
 
 @router.post("/", response_model=Category, status_code=status.HTTP_201_CREATED)
-def create_new_category(
+def create_category(
     category: CategoryCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Create a new category.
+    Create a new category for the current user.
 
     Request Body:
         {
@@ -82,54 +71,40 @@ def create_new_category(
 
     Returns:
         Created category with generated ID
-
-    Status Codes:
-        - 201: Category created successfully
-        - 422: Validation error (invalid data)
     """
-    return create_category(db, category)
+    return crud.create_category(db=db, category=category, user_id=current_user.id)
 
 
 @router.get("/{category_id}", response_model=Category)
-def get_category_by_id(
+def read_category(
     category_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get a specific category by ID.
+    Get a specific category by ID (must belong to current user).
 
     Path Parameters:
         - category_id: ID of the category
 
     Returns:
         Category object
-
-    Status Codes:
-        - 200: Category found
-        - 404: Category not found
-
-    Example:
-        GET /api/v1/categories/1
     """
-    db_category = get_category(db, category_id)
-
-    if db_category is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Category with id {category_id} not found"
-        )
-
+    db_category = crud.get_category(db, category_id=category_id)
+    if db_category is None or db_category.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Category not found")
     return db_category
 
 
 @router.put("/{category_id}", response_model=Category)
-def update_existing_category(
+def update_category(
     category_id: int,
     category: CategoryUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Update an existing category.
+    Update an existing category (must belong to current user).
 
     Path Parameters:
         - category_id: ID of the category to update
@@ -142,57 +117,29 @@ def update_existing_category(
 
     Returns:
         Updated category
-
-    Status Codes:
-        - 200: Category updated successfully
-        - 404: Category not found
-        - 422: Validation error
-
-    Example:
-        PUT /api/v1/categories/1
     """
-    db_category = update_category(db, category_id, category)
-
-    if db_category is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Category with id {category_id} not found"
-        )
-
-    return db_category
+    db_category = crud.get_category(db, category_id=category_id)
+    if db_category is None or db_category.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return crud.update_category(db=db, category_id=category_id, category=category, user_id=current_user.id)
 
 
 @router.delete("/{category_id}", response_model=Category)
-def delete_existing_category(
+def delete_category(
     category_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Delete a category.
+    Delete a category (must belong to current user).
 
     Path Parameters:
         - category_id: ID of the category to delete
 
     Returns:
         Deleted category
-
-    Status Codes:
-        - 200: Category deleted successfully
-        - 404: Category not found
-
-    Warning:
-        This will also delete all transactions in this category
-        due to cascade delete.
-
-    Example:
-        DELETE /api/v1/categories/1
     """
-    db_category = delete_category(db, category_id)
-
-    if db_category is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Category with id {category_id} not found"
-        )
-
-    return db_category
+    db_category = crud.get_category(db, category_id=category_id)
+    if db_category is None or db_category.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Category not found")
+    return crud.delete_category(db=db, category_id=category_id, user_id=current_user.id)

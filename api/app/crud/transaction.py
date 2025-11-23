@@ -35,7 +35,7 @@ def get_transactions(
     end_date: date = None
 ):
     """
-    Get transactions with optional filtering.
+    Get transactions with optional filtering, scoped to user.
 
     Args:
         db: Database session
@@ -45,11 +45,12 @@ def get_transactions(
         category_id: Filter by category ID
         start_date: Filter transactions from this date
         end_date: Filter transactions until this date
+        user_id: ID of the user
 
     Returns:
         List of Transaction objects
     """
-    query = db.query(Transaction)
+    query = db.query(Transaction).filter(Transaction.user_id == user_id)
 
     # Apply filters if provided
     if transaction_type:
@@ -68,14 +69,15 @@ def get_transactions(
     return query.order_by(Transaction.date.desc()).offset(skip).limit(limit).all()
 
 
-def get_transactions_by_month(db: Session, year: int, month: int):
+def get_transactions_by_month(db: Session, year: int, month: int, user_id: int):
     """
-    Get all transactions for a specific month.
+    Get all transactions for a specific month and user.
 
     Args:
         db: Database session
         year: Year (e.g., 2024)
         month: Month (1-12)
+        user_id: ID of the user
 
     Returns:
         List of Transaction objects
@@ -83,42 +85,45 @@ def get_transactions_by_month(db: Session, year: int, month: int):
     return db.query(Transaction).filter(
         and_(
             extract('year', Transaction.date) == year,
-            extract('month', Transaction.date) == month
+            extract('month', Transaction.date) == month,
+            Transaction.user_id == user_id
         )
     ).order_by(Transaction.date.desc()).all()
 
 
-def create_transaction(db: Session, transaction: TransactionCreate):
+def create_transaction(db: Session, transaction: TransactionCreate, user_id: int):
     """
-    Create a new transaction.
+    Create a new transaction for a user.
 
     Args:
         db: Database session
         transaction: TransactionCreate schema
+        user_id: ID of the user creating the transaction
 
     Returns:
         Created Transaction object
     """
-    db_transaction = Transaction(**transaction.model_dump())
+    db_transaction = Transaction(**transaction.model_dump(), user_id=user_id)
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
     return db_transaction
 
 
-def update_transaction(db: Session, transaction_id: int, transaction: TransactionUpdate):
+def update_transaction(db: Session, transaction_id: int, transaction: TransactionUpdate, user_id: int):
     """
-    Update an existing transaction.
+    Update an existing transaction, scoped to user.
 
     Args:
         db: Database session
         transaction_id: ID of transaction to update
         transaction: TransactionUpdate schema
+        user_id: ID of the user who owns the transaction
 
     Returns:
         Updated Transaction object or None
     """
-    db_transaction = get_transaction(db, transaction_id)
+    db_transaction = get_transaction(db, transaction_id, user_id)
 
     if db_transaction is None:
         return None
@@ -135,18 +140,19 @@ def update_transaction(db: Session, transaction_id: int, transaction: Transactio
     return db_transaction
 
 
-def delete_transaction(db: Session, transaction_id: int):
+def delete_transaction(db: Session, transaction_id: int, user_id: int):
     """
-    Delete a transaction.
+    Delete a transaction, scoped to user.
 
     Args:
         db: Database session
         transaction_id: ID of transaction to delete
+        user_id: ID of the user who owns the transaction
 
     Returns:
         Deleted Transaction object or None
     """
-    db_transaction = get_transaction(db, transaction_id)
+    db_transaction = get_transaction(db, transaction_id, user_id)
 
     if db_transaction is None:
         return None

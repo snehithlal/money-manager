@@ -6,9 +6,9 @@ from app.schemas.analytics import MonthlySummary, CategorySummary
 from datetime import date
 import calendar
 
-def get_monthly_summary(db: Session, year: int, month: int) -> MonthlySummary:
+def get_monthly_summary(db: Session, year: int, month: int, user_id: int) -> MonthlySummary:
     """
-    Calculate total income, expense, and balance for a specific month.
+    Calculate total income, expense, and balance for a specific month and user.
     """
     # Get start and end date of the month
     start_date = date(year, month, 1)
@@ -21,7 +21,8 @@ def get_monthly_summary(db: Session, year: int, month: int) -> MonthlySummary:
         func.sum(Transaction.amount).label("total")
     ).filter(
         Transaction.date >= start_date,
-        Transaction.date <= end_date
+        Transaction.date <= end_date,
+        Transaction.user_id == user_id
     ).group_by(Transaction.type).all()
 
     total_income = 0.0
@@ -40,16 +41,16 @@ def get_monthly_summary(db: Session, year: int, month: int) -> MonthlySummary:
         balance=total_income - total_expense
     )
 
-def get_category_summary(db: Session, type: str = None) -> list[CategorySummary]:
+def get_category_summary(db: Session, user_id: int, type: str = None) -> list[CategorySummary]:
     """
-    Calculate total amount per category, optionally filtered by transaction type.
+    Calculate total amount per category for a user, optionally filtered by transaction type.
     """
     query = db.query(
         Category.name,
         Category.color,
         Category.icon,
         func.sum(Transaction.amount).label("total")
-    ).join(Transaction).group_by(Category.id)
+    ).join(Transaction).filter(Transaction.user_id == user_id).group_by(Category.id)
 
     if type:
         query = query.filter(Transaction.type == type)

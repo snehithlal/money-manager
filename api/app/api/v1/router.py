@@ -16,11 +16,19 @@ Usage in main.py:
 """
 
 from fastapi import APIRouter
-from app.routers import categories, transactions, analytics
+from app.routers import categories, transactions, analytics, auth
 
 # Create the v1 API router
 # All routes registered here will be prefixed with /api/v1
 api_v1_router = APIRouter(prefix="/api/v1")
+
+# Register authentication endpoints
+# Final routes: /api/v1/auth/*
+api_v1_router.include_router(
+    auth.router,
+    prefix="/auth",
+    tags=["Auth"]
+)
 
 # Register category endpoints
 # Final routes: /api/v1/categories/*

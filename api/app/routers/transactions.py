@@ -21,14 +21,9 @@ from datetime import date
 
 from app.database import get_db
 from app.schemas import Transaction, TransactionCreate, TransactionUpdate
-from app.crud import (
-    get_transaction,
-    get_transactions,
-    get_transactions_by_month,
-    create_transaction,
-    update_transaction,
-    delete_transaction
-)
+from app import crud
+from app.api.deps import get_current_user
+from app.models.user import User
 
 router = APIRouter()
 
@@ -41,10 +36,11 @@ def list_transactions(
     category_id: Optional[int] = Query(None, description="Filter by category ID"),
     start_date: Optional[date] = Query(None, description="Filter from this date (YYYY-MM-DD)"),
     end_date: Optional[date] = Query(None, description="Filter until this date (YYYY-MM-DD)"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get all transactions with optional filtering.
+    Get all transactions for the current user with optional filtering.
 
     Query Parameters:
         - skip: Number of records to skip (default: 0)
@@ -56,32 +52,27 @@ def list_transactions(
 
     Returns:
         List of transactions with nested category information
-
-    Examples:
-        GET /api/v1/transactions
-        GET /api/v1/transactions?type=expense
-        GET /api/v1/transactions?category_id=1
-        GET /api/v1/transactions?start_date=2024-01-01&end_date=2024-01-31
-        GET /api/v1/transactions?type=income&category_id=2&limit=50
     """
-    return get_transactions(
+    return crud.get_transactions(
         db,
         skip=skip,
         limit=limit,
-        transaction_type=type,
+        type=type,
         category_id=category_id,
         start_date=start_date,
-        end_date=end_date
+        end_date=end_date,
+        user_id=current_user.id
     )
 
 
 @router.post("/", response_model=Transaction, status_code=status.HTTP_201_CREATED)
-def create_new_transaction(
+def create_transaction(
     transaction: TransactionCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Create a new transaction.
+    Create a new transaction for the current user.
 
     Request Body:
         {
@@ -94,126 +85,74 @@ def create_new_transaction(
 
     Returns:
         Created transaction with generated ID and category info
-
-    Status Codes:
-        - 201: Transaction created successfully
-        - 422: Validation error (invalid data)
-        - 404: Category not found (if category_id doesn't exist)
-
-    Validation Rules:
-        - amount: Must be positive number
-        - description: Optional, max 200 characters
-        - date: Required, format YYYY-MM-DD
-        - category_id: Must exist in database
-        - type: Must be "income" or "expense"
     """
-    # Note: Foreign key constraint will raise error if category doesn't exist
-    return create_transaction(db, transaction)
+    # Verify category belongs to user
+    category = crud.get_category(db, category_id=transaction.category_id)
+    if not category or category.user_id != current_user.id:
+        raise HTTPException(status_code=400, detail="Invalid category")
+
+    return crud.create_transaction(db, transaction, user_id=current_user.id)
 
 
 @router.get("/{transaction_id}", response_model=Transaction)
-def get_transaction_by_id(
+def read_transaction(
     transaction_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Get a specific transaction by ID.
+    Get a specific transaction by ID (must belong to current user).
 
     Path Parameters:
         - transaction_id: ID of the transaction
 
     Returns:
         Transaction object with nested category information
-
-    Status Codes:
-        - 200: Transaction found
-        - 404: Transaction not found
-
-    Example:
-        GET /api/v1/transactions/1
     """
-    db_transaction = get_transaction(db, transaction_id)
-
-    if db_transaction is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
-        )
-
+    db_transaction = crud.get_transaction(db, transaction_id=transaction_id)
+    if db_transaction is None or db_transaction.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Transaction not found")
     return db_transaction
 
 
 @router.put("/{transaction_id}", response_model=Transaction)
-def update_existing_transaction(
+def update_transaction(
     transaction_id: int,
     transaction: TransactionUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Update an existing transaction.
+    Update a transaction (must belong to current user).
 
     Path Parameters:
         - transaction_id: ID of the transaction to update
 
-    Request Body (all fields optional):
-        {
-            "amount": 75.00,
-            "description": "Updated description"
-        }
-
     Returns:
         Updated transaction
-
-    Status Codes:
-        - 200: Transaction updated successfully
-        - 404: Transaction not found
-        - 422: Validation error
-
-    Note:
-        Only provided fields will be updated.
-        Omitted fields will keep their current values.
-
-    Example:
-        PUT /api/v1/transactions/1
     """
-    db_transaction = update_transaction(db, transaction_id, transaction)
-
-    if db_transaction is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
-        )
-
-    return db_transaction
+    db_transaction = crud.get_transaction(db, transaction_id=transaction_id)
+    if db_transaction is None or db_transaction.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    return crud.update_transaction(db=db, transaction_id=transaction_id, transaction=transaction, user_id=current_user.id)
 
 
 @router.delete("/{transaction_id}", response_model=Transaction)
-def delete_existing_transaction(
+def delete_transaction(
     transaction_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Delete a transaction.
+    Delete a transaction (must belong to current user).
 
     Path Parameters:
         - transaction_id: ID of the transaction to delete
 
     Returns:
         Deleted transaction
-
-    Status Codes:
-        - 200: Transaction deleted successfully
-        - 404: Transaction not found
-
-    Example:
-        DELETE /api/v1/transactions/1
     """
-    db_transaction = delete_transaction(db, transaction_id)
-
-    if db_transaction is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Transaction with id {transaction_id} not found"
-        )
-
-    return db_transaction
+    db_transaction = crud.get_transaction(db, transaction_id=transaction_id)
+    if db_transaction is None or db_transaction.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    return crud.delete_transaction(db=db, transaction_id=transaction_id, user_id=current_user.id)

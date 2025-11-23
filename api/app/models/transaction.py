@@ -35,6 +35,8 @@ class Transaction(Base):
     date = Column(Date, nullable=False, default=date.today)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     type = Column(Enum(TransactionType), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"))
 
     # Relationship: Each transaction belongs to one category
     category = relationship("Category", back_populates="transactions")
+    owner = relationship("User", back_populates="transactions")

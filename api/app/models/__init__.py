@@ -7,5 +7,6 @@ Each file represents a different entity/table in the database.
 
 from .category import Category
 from .transaction import Transaction
+from .user import User
 
-__all__ = ["Category", "Transaction"]
+__all__ = ["Category", "Transaction", "User"]
