@@ -1,147 +1,261 @@
 # 💰 Money Manager
 
-A full-stack money management application built with **Next.js** and **FastAPI**, designed to help you track income, expenses, and analyze your financial habits.
+A modern, full-stack personal finance management application built with Next.js and FastAPI.
+
+![Money Manager](https://img.shields.io/badge/Status-Production%20Ready-success)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.104-009688)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
 
 ## ✨ Features
 
-- � **Track Transactions** - Record income and expenses with categories
+- 🔐 **Secure Authentication** - JWT-based user authentication
+- 💸 **Transaction Management** - Track income and expenses with categories
+- 📊 **Analytics Dashboard** - Visual insights with charts and summaries
 - 🏷️ **Category Management** - Organize transactions with custom categories
-- 📈 **Analytics** - View monthly summaries and spending patterns
-- 🎨 **Modern UI** - Beautiful, responsive interface with Tailwind CSS
-- 🚀 **Fast API** - High-performance backend with FastAPI
-- 📱 **Mobile Responsive** - Works seamlessly on all devices
+- 🔍 **Advanced Filtering** - Filter by type, category, and date range
+- ✏️ **Quick Entry** - Fast transaction entry with "Today" button
+- 📱 **Responsive Design** - Works seamlessly on desktop and mobile
+- 🌐 **Multi-currency Support** - Default INR (₹), supports USD, EUR, GBP
 
-## 🛠️ Tech Stack
+## 🚀 Tech Stack
 
-### **Frontend**
-- **Next.js 14+** - React framework with App Router
-- **TypeScript** - Type-safe development
-- **Tailwind CSS** - Utility-first styling
-- **React** - UI components
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **Data Fetching**: TanStack Query (React Query)
+- **Charts**: Recharts
+- **Forms**: React Hook Form
+- **UI Components**: Shadcn UI
 
-### **Backend**
-- **FastAPI** - Modern Python web framework
-- **SQLAlchemy** - SQL toolkit and ORM
-- **Pydantic** - Data validation
-- **SQLite** - Development database
-- **PostgreSQL** - Production database (Vercel)
+### Backend
+- **Framework**: FastAPI
+- **Database**: SQLite (dev) / PostgreSQL (production)
+- **ORM**: SQLAlchemy
+- **Authentication**: JWT with passlib
+- **Validation**: Pydantic v2
 
-## 📁 Project Structure
+## 📦 Project Structure
 
 ```
 money-manager/
+├── frontend/              # Next.js frontend application
 │   ├── src/
-│   │   ├── app/          # Next.js App Router pages
+│   │   ├── app/          # App router pages
 │   │   ├── components/   # React components
-│   │   └── lib/          # Utilities and API client
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── lib/          # Utilities and API client
+│   │   ├── stores/       # Zustand stores
+│   │   └── types/        # TypeScript types
 │   └── package.json
 │
-├── api/                  # FastAPI backend
+├── api/                   # FastAPI backend application
 │   ├── app/
-│   │   ├── routers/      # API route handlers
-│   │   ├── models.py     # Database models (SQLAlchemy)
-│   │   ├── schemas.py    # Data validation (Pydantic)
-│   │   ├── database.py   # Database connection
-│   │   └── main.py       # FastAPI app
-│   ├── index.py          # Vercel entry point
-│   └── requirements.txt  # Python dependencies
+│   │   ├── api/          # API versioning
+│   │   ├── core/         # Security and config
+│   │   ├── crud/         # Database operations
+│   │   ├── models/       # SQLAlchemy models
+│   │   ├── routers/      # API endpoints
+│   │   └── schemas/      # Pydantic schemas
+│   ├── seed.py           # Database seeding script
+│   └── requirements.txt
 │
-└── vercel.json           # Vercel deployment config
+└── README.md
 ```
 
-## 🚀 Getting Started
+## 🛠️ Local Development Setup
 
 ### Prerequisites
-- **Python 3.9+** (for FastAPI backend)
-- **Node.js 18+** (for Next.js frontend)
-- **npm** or **yarn** (package manager)
+- Node.js 18+ and npm
+- Python 3.11+
+- Git
 
-### Backend Setup (FastAPI)
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd money-manager
+```
 
-1. **Navigate to the api directory:**
-   ```bash
-   cd api
+### 2. Backend Setup
+```bash
+cd api
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run database seed (optional - creates admin user and sample data)
+python seed.py
+
+# Start development server
+fastapi dev app/main.py
+```
+
+Backend will run on `http://localhost:8000`
+- API docs: `http://localhost:8000/docs`
+
+### 3. Frontend Setup
+```bash
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+Frontend will run on `http://localhost:3000`
+
+## 👤 Default Users
+
+### Admin User
+- **Email**: `admin@moneymanager.com`
+- **Password**: `admin123`
+- Includes sample categories and transactions
+
+### Test User
+- **Email**: `test@example.com`
+- **Password**: `password123`
+
+## 🌐 Deployment to Vercel (Free Tier)
+
+### Prerequisites
+1. [Vercel Account](https://vercel.com/signup) (free)
+2. [Vercel Postgres](https://vercel.com/docs/storage/vercel-postgres) database (free tier)
+
+### Step 1: Prepare Your Repository
+Ensure your code is pushed to GitHub/GitLab/Bitbucket.
+
+### Step 2: Deploy Backend (API)
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click "Add New" → "Project"
+3. Import your repository
+4. Configure:
+   - **Framework Preset**: Other
+   - **Root Directory**: `api`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Output Directory**: Leave empty
+   - **Install Command**: `pip install -r requirements.txt`
+
+5. Add Environment Variables:
+   ```
+   DATABASE_URL=<your-vercel-postgres-url>
+   SECRET_KEY=<generate-a-secure-random-key>
    ```
 
-2. **Create a virtual environment:**
-   ```bash
-   python -m venv venv
+6. Deploy!
+
+### Step 3: Set Up Vercel Postgres
+1. In your Vercel project, go to "Storage"
+2. Create a new Postgres database
+3. Copy the `DATABASE_URL` connection string
+4. Add it to your project's environment variables
+
+### Step 4: Deploy Frontend
+1. Create a new Vercel project for frontend
+2. Configure:
+   - **Framework Preset**: Next.js
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `.next`
+
+3. Add Environment Variable:
+   ```
+   NEXT_PUBLIC_API_URL=<your-backend-vercel-url>
    ```
 
-3. **Activate the virtual environment:**
-   - macOS/Linux: `source venv/bin/activate`
-   - Windows: `venv\Scripts\activate`
+4. Deploy!
 
-4. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Step 5: Initialize Production Database
+After deploying the backend, run the seed script:
+```bash
+# SSH into your Vercel deployment or use Vercel CLI
+vercel env pull
+python seed.py
+```
 
-5. **Run the development server:**
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+## 📝 API Documentation
 
-6. **Access the API:**
-   - API: http://localhost:8000
-   - Interactive docs: http://localhost:8000/docs
-   - Alternative docs: http://localhost:8000/redoc
+Once deployed, visit `https://your-api-url.vercel.app/docs` for interactive API documentation.
 
-### Frontend Setup (Next.js)
+### Key Endpoints
 
-1. **Navigate to the frontend directory:**
-   ```bash
-   cd frontend
-   ```
+#### Authentication
+- `POST /api/v1/auth/users` - Register new user
+- `POST /api/v1/auth/token` - Login and get JWT token
 
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+#### Categories
+- `GET /api/v1/categories/` - List all categories
+- `POST /api/v1/categories/` - Create category
+- `PUT /api/v1/categories/{id}` - Update category
+- `DELETE /api/v1/categories/{id}` - Delete category
 
-3. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
+#### Transactions
+- `GET /api/v1/transactions/` - List transactions (with filters)
+- `POST /api/v1/transactions/` - Create transaction
+- `PUT /api/v1/transactions/{id}` - Update transaction
+- `DELETE /api/v1/transactions/{id}` - Delete transaction
 
-4. **Access the app:**
-   - Frontend: http://localhost:3000
+#### Analytics
+- `GET /api/v1/analytics/monthly/{year}/{month}` - Monthly summary
+- `GET /api/v1/analytics/categories` - Category breakdown
 
-## 📚 Learning Resources
+## 🔒 Security Features
 
-### FastAPI Concepts
-- **Models (models.py)**: Define database structure using SQLAlchemy ORM
-- **Schemas (schemas.py)**: Validate request/response data using Pydantic
-- **Routers**: Organize endpoints by feature (categories, transactions, analytics)
-- **Dependency Injection**: `get_db()` provides database sessions to endpoints
-- **CORS**: Allows frontend to communicate with backend
+- JWT-based authentication
+- Password hashing with bcrypt
+- User-scoped data isolation
+- CORS protection
+- SQL injection prevention via ORM
 
-### Next.js Concepts
-- **App Router**: File-based routing in `src/app/`
-- **TypeScript**: Type-safe JavaScript
-- **Tailwind CSS**: Utility-first CSS framework
-- **Server/Client Components**: React Server Components by default
+## 🎨 UI Features
 
-## 🎯 Features (To Be Implemented)
+- Modern, clean interface with Tailwind CSS
+- Dark mode support (coming soon)
+- Responsive design for all screen sizes
+- Loading states and error handling
+- Smooth animations and transitions
 
-- ✅ Project structure setup
-- ⏳ Category management (CRUD)
-- ⏳ Transaction tracking (income/expense)
-- ⏳ Monthly analytics
-- ⏳ Visual charts
-- ⏳ Responsive UI
+## 📊 Analytics & Insights
 
-## 🚢 Deployment
+- Monthly income vs expense summary
+- Category-wise spending breakdown
+- Visual charts with Recharts
+- Date range filtering
+- Transaction type filtering
 
-This project is configured for **Vercel** deployment:
-- Frontend and backend deploy together
-- Uses Vercel Postgres for production database
-- Automatic HTTPS and CDN
+## 🤝 Contributing
 
-## 📖 Next Steps
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Implement category CRUD endpoints
-2. Implement transaction CRUD endpoints
-3. Build frontend UI components
-4. Add charts and analytics
-5. Deploy to Vercel
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🐛 Known Issues
+
+- Logout redirect requires manual localStorage clear in some cases (persistence middleware)
+- Date filter UI may need adjustment on very small screens
+
+## 🚧 Roadmap
+
+- [ ] Dark mode support
+- [ ] Budget tracking and alerts
+- [ ] Recurring transactions
+- [ ] Export to CSV/PDF
+- [ ] Multi-user household accounts
+- [ ] Mobile app (React Native)
+
+## 💬 Support
+
+For issues and questions, please open an issue on GitHub.
+
+---
+
+**Made with ❤️ using Next.js and FastAPI**
