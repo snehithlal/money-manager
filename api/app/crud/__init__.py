@@ -23,6 +23,11 @@ from .transaction import (
     delete_transaction
 )
 
+from .analytics import (
+    get_monthly_summary,
+    get_category_summary
+)
+
 __all__ = [
     # Category CRUD
     "get_category",
@@ -38,4 +43,7 @@ __all__ = [
     "create_transaction",
     "update_transaction",
     "delete_transaction",
+    # Analytics CRUD
+    "get_monthly_summary",
+    "get_category_summary",
 ]
