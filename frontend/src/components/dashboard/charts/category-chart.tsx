@@ -43,7 +43,7 @@ export const CategoryChart = () => {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number) => `$${value.toFixed(2)}`}
+                  formatter={(value: number) => `₹${value.toFixed(2)}`}
                 />
                 <Legend />
               </PieChart>

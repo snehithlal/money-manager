@@ -121,7 +121,18 @@ export const TransactionForm = ({ transactionToEdit, onSuccess }: TransactionFor
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="date">Date</Label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setValue("date", new Date().toISOString().split('T')[0])}
+            className="h-7 text-xs text-blue-600 hover:text-blue-700"
+          >
+            Today
+          </Button>
+        </div>
         <Input
           id="date"
           type="date"

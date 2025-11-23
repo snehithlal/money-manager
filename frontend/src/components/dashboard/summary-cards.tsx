@@ -32,7 +32,7 @@ export const SummaryCards = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600">
-            +${summary?.total_income.toFixed(2) || "0.00"}
+            +₹{summary?.total_income.toFixed(2) || "0.00"}
           </div>
           <p className="text-xs text-muted-foreground">
             For this month
@@ -48,7 +48,7 @@ export const SummaryCards = () => {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600">
-            -${summary?.total_expense.toFixed(2) || "0.00"}
+            -₹{summary?.total_expense.toFixed(2) || "0.00"}
           </div>
           <p className="text-xs text-muted-foreground">
             For this month
@@ -66,7 +66,7 @@ export const SummaryCards = () => {
           <div className={`text-2xl font-bold ${
             (summary?.balance || 0) >= 0 ? "text-blue-600" : "text-red-600"
           }`}>
-            ${summary?.balance.toFixed(2) || "0.00"}
+            ₹{summary?.balance.toFixed(2) || "0.00"}
           </div>
           <p className="text-xs text-muted-foreground">
             Current balance
