@@ -29,10 +29,11 @@ def get_transactions(
     db: Session,
     skip: int = 0,
     limit: int = 100,
-    transaction_type: str = None,
+    type: str = None,
     category_id: int = None,
     start_date: date = None,
-    end_date: date = None
+    end_date: date = None,
+    user_id: int = None
 ):
     """
     Get transactions with optional filtering, scoped to user.
@@ -41,7 +42,7 @@ def get_transactions(
         db: Database session
         skip: Number of records to skip
         limit: Maximum records to return
-        transaction_type: Filter by type ("income" or "expense")
+        type: Filter by type ("income" or "expense")
         category_id: Filter by category ID
         start_date: Filter transactions from this date
         end_date: Filter transactions until this date
@@ -53,8 +54,8 @@ def get_transactions(
     query = db.query(Transaction).filter(Transaction.user_id == user_id)
 
     # Apply filters if provided
-    if transaction_type:
-        query = query.filter(Transaction.type == transaction_type)
+    if type:
+        query = query.filter(Transaction.type == type)
 
     if category_id:
         query = query.filter(Transaction.category_id == category_id)
@@ -123,7 +124,10 @@ def update_transaction(db: Session, transaction_id: int, transaction: Transactio
     Returns:
         Updated Transaction object or None
     """
-    db_transaction = get_transaction(db, transaction_id, user_id)
+    db_transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id,
+        Transaction.user_id == user_id
+    ).first()
 
     if db_transaction is None:
         return None
@@ -152,7 +156,10 @@ def delete_transaction(db: Session, transaction_id: int, user_id: int):
     Returns:
         Deleted Transaction object or None
     """
-    db_transaction = get_transaction(db, transaction_id, user_id)
+    db_transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id,
+        Transaction.user_id == user_id
+    ).first()
 
     if db_transaction is None:
         return None

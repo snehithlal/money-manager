@@ -5,14 +5,16 @@ import { useUIStore } from "@/stores/ui-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Edit, Trash2, Plus, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
-import { Transaction } from "@/types/api";
+import { Transaction, TransactionFilters } from "@/types/api";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { TransactionFiltersComponent } from "./transaction-filters";
 
 export const TransactionList = () => {
-  const { data: transactions, isLoading, error } = useTransactions();
+  const [filters, setFilters] = useState<TransactionFilters>({});
+  const { data: transactions, isLoading, error } = useTransactions(filters);
   const deleteTransaction = useDeleteTransaction();
-  const { openModal } = useUIStore();
+  const { openModal, setModalData } = useUIStore();
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this transaction?")) {
@@ -21,8 +23,8 @@ export const TransactionList = () => {
   };
 
   const handleEdit = (transaction: Transaction) => {
-    console.log("Edit transaction", transaction);
-    alert("Edit feature coming in next update! (Requires store update)");
+    setModalData(transaction);
+    openModal("transaction");
   };
 
   if (isLoading) {
@@ -51,6 +53,10 @@ export const TransactionList = () => {
           <Plus className="mr-2 h-4 w-4" />
           Add Transaction
         </Button>
+      </div>
+
+      <div className="mb-6">
+        <TransactionFiltersComponent filters={filters} onFilterChange={setFilters} />
       </div>
 
       <div className="space-y-4">

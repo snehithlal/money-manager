@@ -25,7 +25,10 @@ export const apiClient = axios.create({
 // Add a request interceptor to inject the token
 apiClient.interceptors.request.use(
   (config) => {
-    // }
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -37,20 +40,10 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle common errors
+    // Handle 401 Unauthorized globally if needed (e.g., logout)
     if (error.response?.status === 401) {
-      // Handle unauthorized (redirect to login when auth is implemented)
-      console.error('Unauthorized access');
+      useAuthStore.getState().logout();
     }
-
-    if (error.response?.status === 404) {
-      console.error('Resource not found');
-    }
-
-    if (error.response?.status >= 500) {
-      console.error('Server error');
-    }
-
     return Promise.reject(error);
   }
 );

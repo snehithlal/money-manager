@@ -10,7 +10,7 @@ import { CategoryForm } from "@/components/categories/category-form";
 import { TransactionForm } from "@/components/transactions/transaction-form";
 
 export const Modal = () => {
-  const { isModalOpen, modalType, closeModal } = useUIStore();
+  const { isModalOpen, modalType, modalData, closeModal } = useUIStore();
 
   if (!isModalOpen) return null;
 
@@ -39,7 +39,7 @@ export const Modal = () => {
 
         <div className="p-6">
           {modalType === "category" && <CategoryForm />}
-          {modalType === "transaction" && <TransactionForm />}
+          {modalType === "transaction" && <TransactionForm transactionToEdit={modalData} />}
         </div>
       </div>
     </div>
