@@ -9,13 +9,16 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth-store';
 
 // Base URL for API requests
-// The API_BASE_URL constant is no longer used directly in apiClient creation
-// as the baseURL is now hardcoded to include the API version.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// In production (Vercel), use relative path so API calls go through the same domain
+// In development, use localhost:8000
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== 'undefined' && window.location.origin.includes('vercel.app')
+    ? '' // Use relative path in production
+    : 'http://localhost:8000');
 
 // Create axios instance with default config
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api/v1', // Hardcoded baseURL including API version
+  baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
