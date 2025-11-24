@@ -1,0 +1,10 @@
+# Ignore everything except the entry point
+app/
+seed.py
+*.db
+venv/
+__pycache__/
+*.pyc
+.env
+.env.local
+README.md
