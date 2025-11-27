@@ -44,8 +44,13 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     // Handle 401 Unauthorized globally if needed (e.g., logout)
+    // Handle 401 Unauthorized globally
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
+      // Force hard redirect to login to clear any stale state and prevent loops
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
