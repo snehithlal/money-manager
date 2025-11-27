@@ -12,7 +12,7 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 from app.main import app
+from mangum import Mangum
 
-# Vercel looks for a variable named 'app' or 'handler'
-# We're exporting our FastAPI app instance
-handler = app
+# Vercel/AWS Lambda compatible handler using Mangum
+handler = Mangum(app, lifespan="off")
