@@ -48,8 +48,11 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       useAuthStore.getState().logout();
       // Force hard redirect to login to clear any stale state and prevent loops
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth-storage'); // Explicitly clear storage
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
