@@ -16,7 +16,7 @@ from datetime import date, timedelta
 
 def create_admin_user(db: Session):
     """Create admin user if not exists."""
-    admin_email = "admin@moneymanager.com"
+    admin_email = "admin@example.com"
 
     # Check if admin already exists
     existing_admin = db.query(User).filter(User.email == admin_email).first()
@@ -130,7 +130,7 @@ def seed_database():
         print("\n✅ Database seeded successfully!\n")
         print("=" * 50)
         print("Admin Credentials:")
-        print("  Email: admin@moneymanager.com")
+        print("  Email: admin@example.com")
         print("  Password: admin123")
         print("=" * 50)
         print("\nTest User Credentials:")
