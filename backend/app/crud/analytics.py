@@ -46,9 +46,11 @@ def get_category_summary(db: Session, user_id: int, type: str = None) -> list[Ca
     Calculate total amount per category for a user, optionally filtered by transaction type.
     """
     query = db.query(
+        Category.id,
         Category.name,
         Category.color,
         Category.icon,
+        func.count(Transaction.id).label("count"),
         func.sum(Transaction.amount).label("total")
     ).join(Transaction).filter(Transaction.user_id == user_id).group_by(Category.id)
 
@@ -60,10 +62,12 @@ def get_category_summary(db: Session, user_id: int, type: str = None) -> list[Ca
     summary = []
     for r in results:
         summary.append(CategorySummary(
+            category_id=r.id,
             category_name=r.name,
+            category_color=r.color,
+            category_icon=r.icon,
             total_amount=float(r.total or 0),
-            color=r.color,
-            icon=r.icon
+            transaction_count=r.count
         ))
 
     # Sort by total amount descending
