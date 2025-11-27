@@ -89,3 +89,4 @@ dmypy.json
 
 # Vercel
 .vercel
+.env*.local
