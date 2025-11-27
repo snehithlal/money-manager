@@ -17,10 +17,9 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       router.push("/login");
     }
 
-    // If authenticated and on login/register, redirect to dashboard
-    if (isAuthenticated && token && publicPaths.includes(pathname)) {
-      router.push("/");
-    }
+    // REMOVED: Auto-redirect to dashboard if authenticated.
+    // This was causing infinite loops when the token was invalid (401) but local state said authenticated.
+    // Now, if a user lands on /login, they stay there, allowing them to re-login.
   }, [isAuthenticated, token, pathname, router]);
 
   // If not authenticated and on a protected route, don't render children (to prevent flash)
