@@ -1,6 +1,46 @@
-# 💰 Money Manager
+# 💰# Money Manager
 
-A modern, full-stack personal finance management application built with Next.js and FastAPI.
+A comprehensive personal finance management application built with FastAPI and Next.js.
+
+## 🚀 Local Development
+
+We have streamlined the local development process with helper scripts.
+
+### Prerequisites
+- Python 3.8+
+- Node.js 18+
+- tmux (optional, for the dashboard experience)
+
+### Quick Start
+
+1.  **Setup**: Install all dependencies (backend & frontend).
+    ```bash
+    ./bin/setup
+    ```
+
+2.  **Start**: Launch the development environment.
+    ```bash
+    ./tmux-dev.sh
+    ```
+    This will open a tmux session with:
+    - **Left Pane**: Backend API (http://localhost:8000)
+    - **Top Right**: Frontend App (http://localhost:3000)
+    - **Bottom Right**: Terminal for commands
+
+    *To exit: Press ` (backtick) then `d` to detach.*
+
+### Manual Start
+If you don't use tmux, you can start services individually:
+
+**Backend:**
+```bash
+./bin/start backend
+```
+
+**Frontend:**
+```bash
+./bin/start frontend
+```
 
 ![Money Manager](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Next.js](https://img.shields.io/badge/Next.js-14-black)

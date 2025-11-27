@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+if [ "$1" == "backend" ]; then
+    echo "🐍 Starting Backend..."
+    if [ ! -d "venv" ]; then
+        echo "Error: Virtual environment not found. Run 'bin/setup' first."
+        exit 1
+    fi
+    source venv/bin/activate
+    # Change to backend directory so 'app' module is found
+    cd backend
+    # Run the backend app
+    uvicorn app.main:app --reload --port 8000
+elif [ "$1" == "frontend" ]; then
+    echo "⚛️ Starting Frontend..."
+    cd frontend
+    npm run dev
+else
+    echo "Usage: bin/start [backend|frontend]"
+    exit 1
+fi

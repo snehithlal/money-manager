@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+echo "🚀 Setting up Money Manager..."
+
+# Backend Setup
+echo "📦 Installing Backend Dependencies..."
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
+
+source venv/bin/activate
+echo "Installing pip requirements..."
+pip install -r requirements.txt
+
+# Frontend Setup
+echo "📦 Installing Frontend Dependencies..."
+cd frontend
+if [ ! -d "node_modules" ]; then
+    echo "Installing npm packages..."
+    npm install
+else
+    echo "Node modules already exist. Skipping install (run 'npm install' manually if needed)."
+fi
+cd ..
+
+# Tmux Setup (Optional but recommended)
+if ! command -v tmux &> /dev/null; then
+    echo "⚠️  tmux not found."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v brew &> /dev/null; then
+            echo "🍺 Installing tmux via Homebrew..."
+            brew install tmux
+        else
+            echo "❌ Homebrew not found. Please install tmux manually: https://github.com/tmux/tmux/wiki"
+        fi
+    else
+        echo "Please install tmux manually for the dashboard experience."
+    fi
+else
+    echo "✅ tmux is already installed."
+fi
+
+echo "✅ Setup Complete!"
+echo "Run './tmux-dev.sh' to start the development environment."
