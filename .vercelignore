@@ -1,0 +1,7 @@
+# Prevent Vercel from creating functions for every Python file
+# Only api/index.py should be a serverless function
+api/app/**
+api/seed.py
+api/**/*.db
+api/venv/**
+api/__pycache__/**
