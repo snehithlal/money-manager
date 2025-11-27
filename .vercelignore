@@ -1,5 +1,8 @@
-# Only exclude files that shouldn't be deployed
-# The app/ directory MUST be included for imports to work
+# Exclude all Python files except api/index.py
+api/**/*.py
+!api/index.py
+
+# Exclude other unnecessary files
 api/seed.py
 api/**/*.db
 api/venv/**
