@@ -53,7 +53,7 @@ export const TransactionFiltersComponent = ({
         <Select
           value={filters.type || "all"}
           onChange={handleTypeChange}
-          className="w-32"
+          className="w-32 text-gray-900 border-gray-300"
         >
           <option value="all">All Types</option>
           <option value="income">Income</option>
@@ -63,7 +63,7 @@ export const TransactionFiltersComponent = ({
         <Select
           value={filters.category_id?.toString() || "all"}
           onChange={handleCategoryChange}
-          className="w-40"
+          className="w-40 text-gray-900 border-gray-300"
         >
           <option value="all">All Categories</option>
           {categories?.map((category) => (
@@ -78,17 +78,17 @@ export const TransactionFiltersComponent = ({
           name="start_date"
           value={filters.start_date || ""}
           onChange={handleDateChange}
-          className="w-36"
+          className="w-36 text-gray-900 border-gray-300"
         />
 
-        <span className="text-gray-400">to</span>
+        <span className="text-gray-500 font-medium">to</span>
 
         <Input
           type="date"
           name="end_date"
           value={filters.end_date || ""}
           onChange={handleDateChange}
-          className="w-36"
+          className="w-36 text-gray-900 border-gray-300"
         />
 
         {hasFilters && (
