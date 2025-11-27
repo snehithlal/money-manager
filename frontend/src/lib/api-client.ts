@@ -49,9 +49,12 @@ apiClient.interceptors.response.use(
       useAuthStore.getState().logout();
       // Force hard redirect to login to clear any stale state and prevent loops
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth-storage'); // Explicitly clear storage
+        // Use Zustand's persist API to clear storage reliably
+        useAuthStore.persist.clearStorage();
+
         if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+          // Use replace to prevent back-button loops
+          window.location.replace('/login');
         }
       }
     }
