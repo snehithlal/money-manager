@@ -28,7 +28,7 @@ from app.models.user import User
 router = APIRouter()
 
 
-@router.get("/", response_model=List[Transaction])
+@router.get("", response_model=List[Transaction])
 def list_transactions(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum records to return"),
@@ -65,7 +65,7 @@ def list_transactions(
     )
 
 
-@router.post("/", response_model=Transaction, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=Transaction, status_code=status.HTTP_201_CREATED)
 def create_transaction(
     transaction: TransactionCreate,
     db: Session = Depends(get_db),
