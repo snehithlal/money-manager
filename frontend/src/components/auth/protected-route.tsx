@@ -9,8 +9,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const token = useAuthStore((state) => state.token);
+  const _hasHydrated = useAuthStore((state) => state._hasHydrated);
 
   useEffect(() => {
+    // Wait for hydration to finish before making decisions
+    if (!_hasHydrated) return;
+
     // If not authenticated and not on public pages, redirect to login
     const publicPaths = ["/login", "/register"];
     if (!isAuthenticated && !token && !publicPaths.includes(pathname)) {
@@ -20,7 +24,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     // REMOVED: Auto-redirect to dashboard if authenticated.
     // This was causing infinite loops when the token was invalid (401) but local state said authenticated.
     // Now, if a user lands on /login, they stay there, allowing them to re-login.
-  }, [isAuthenticated, token, pathname, router]);
+  }, [isAuthenticated, token, pathname, router, _hasHydrated]);
+
+  // If not hydrated yet, show nothing (or a spinner)
+  if (!_hasHydrated) {
+    return null; // Or <LoadingSpinner />
+  }
 
   // If not authenticated and on a protected route, don't render children (to prevent flash)
   const publicPaths = ["/login", "/register"];
